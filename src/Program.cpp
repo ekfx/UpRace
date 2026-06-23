@@ -13,11 +13,11 @@ Program::~Program()
 }
 
 void Program::Loop() {
-    MyClock.StartCounter();
+    ekClock.StartCounter();
     InitializeEssential();
     InitEnvironment();
     Initialize();
-    while (!glfwWindowShouldClose(MyOpenGL.GetWindow())) {
+    while (!glfwWindowShouldClose(ekWindowProvider.GetWindow())) {
         ProcessEssential();
         Processing();
         Render();
@@ -28,23 +28,23 @@ void Program::Loop() {
 }
 
 void Program::Essential() {
-    glfwSwapBuffers(MyOpenGL.GetWindow());   // SwapBuffer, nunca esqueça!
+    glfwSwapBuffers(ekWindowProvider.GetWindow());   // SwapBuffer, nunca esqueça!
     glfwPollEvents();                   // Puxar Eventos, nunca esqueça!
 }
 
 void Program::ProcessEssential() {
     glClear(GL_COLOR_BUFFER_BIT);   // tem que ser definido mesmo fora do set3d
-    MyClock.ProcessDelta();
+    ekClock.ProcessDelta();
     UpdateWindowName(true, 64.0f);
-    Input(MyOpenGL.GetWindow(), MyClock.GetDeltaTime());
-    ProcessPhysics(MyClock.GetDeltaTime());
+    Input(ekWindowProvider.GetWindow(), ekClock.GetDeltaTime());
+    ProcessPhysics(ekClock.GetDeltaTime());
 }
 
 void Program::InitializeEssential() 
 {
-    MyOpenGL.RunWindow(800, 600, "Window", ENGINE::WINDOW::WINDOWED);
-    MyOpenGL.SetVSync(true);
-    glfwSetFramebufferSizeCallback(MyOpenGL.GetWindow(), framebuffer_size_callback);
+    ekWindowProvider.RunWindow(800, 600, "Window", ENGINE::WINDOW::WINDOWED);
+    ekWindowProvider.SetVSync(true);
+    glfwSetFramebufferSizeCallback(ekWindowProvider.GetWindow(), framebuffer_size_callback);
     
     Mouse::StartMouse(GetWindowHandle());
     Keyboard::StartKeyboard(GetWindowHandle());
@@ -89,27 +89,27 @@ void Program::Release()
 // Configs
 void Program::UpdateWindowName(bool if_run, f32 miliseconds) {
     if (if_run) {
-        if (MyTimer.Update(MyClock, miliseconds)) {
-            glfwSetWindowTitle(GetWindowHandle(), TimerUI::GetFPSandMS(MyClock).c_str());    
+        if (ekTimer.Update(ekClock, miliseconds)) {
+            glfwSetWindowTitle(GetWindowHandle(), TimerUI::GetFPSandMS(ekClock).c_str());    
         }
     }
 }
 
 // Getters
 GLFWwindow* Program::GetWindowHandle() {
-    return MyOpenGL.GetWindow();
+    return ekWindowProvider.GetWindow();
 };
 
 f32 Program::GetWindowWidth() {
-    return (f32)MyOpenGL.GetWindowWidth();
+    return (f32)ekWindowProvider.GetWindowWidth();
 }
 
 f32 Program::GetWindowHeight() {
-    return (f32)MyOpenGL.GetWindowHeight();
+    return (f32)ekWindowProvider.GetWindowHeight();
 }
 
 f32 Program::GetWindowAspectRatio() {
-    return (f32)MyOpenGL.GetWindowAspectRatio();
+    return (f32)ekWindowProvider.GetWindowAspectRatio();
 }
 
 std::string Program::GetInfoLog() {
@@ -117,7 +117,7 @@ std::string Program::GetInfoLog() {
 }
 
 void Program::SetVSync(bool off_on) {
-    MyOpenGL.SetVSync(off_on);
+    ekWindowProvider.SetVSync(off_on);
 }
 
 // Setters

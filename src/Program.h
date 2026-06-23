@@ -42,14 +42,14 @@ private:
     f32         height       = GetWindowHeight();
 
     // Objects
-    OpenGL      MyOpenGL;
+    OpenGL      ekWindowProvider;
 
 public:
-    Camera      MyCamera;
-    Clock       MyClock;
-    Timer       MyTimer;
-    SoundCore   MySound;
-    HUD         MyHUD;
+    Camera      ekCamera;
+    Clock       ekClock;
+    Timer       ekTimer;
+    SoundCore   ekSound;
+    HUD         ekHUD;
 
     Program();
     ~Program();

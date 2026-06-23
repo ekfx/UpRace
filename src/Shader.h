@@ -103,19 +103,19 @@ public:
             auto it = UniformArray.insert({name_var, glGetUniformLocation(ShaderProgID, name_var)});
 
             if constexpr (object_type == ENGINE::SHADER::MATRIX_4) {
-                glUniformMatrix4fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+                glUniformMatrix4fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
 
             } else if constexpr (object_type == ENGINE::SHADER::MATRIX_3)  {
-                glUniformMatrix3fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+                glUniformMatrix3fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
 
             } else if constexpr (object_type == ENGINE::SHADER::VECTOR_2)  {
-                glUniform2fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+                glUniform2fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
 
             } else if constexpr (object_type == ENGINE::SHADER::VECTOR_3)  {
-                glUniform3fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+                glUniform3fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
 
             } else if constexpr (object_type == ENGINE::SHADER::VECTOR_4)  {
-                glUniform4fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+                glUniform4fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
 
             } else if constexpr (object_type == ENGINE::SHADER::SIMPLE_VALUE)  {
                 if constexpr (std::is_floating_point_v<T>)  {
