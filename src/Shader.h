@@ -12,6 +12,9 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <type_traits>
+#include <memory>
+#include "Core.h"
 #include "Types.h"
 
 class Shader {
@@ -87,6 +90,44 @@ public:
     void SetVec4Int(const char* name_var, int value_1, int value_2, int value_3, int value_4);
     void SetMat3(const char* name_var, glm::mat3 matrix_3);
     void SetMat4(const char* name_var, glm::mat4 matrix_4);
+
+    // My first template, without AI, just me and the compiler
+    template<i8 object_type, typename T>
+    void SetUniform(const char* name_var, T value) {
+        auto it_ = UniformArray.find(name_var);
+        bool end = 0;
+
+        (it_ != UniformArray.end()) ? end = 0 : end = 1;
+
+        if (end) {
+            auto it = UniformArray.insert({name_var, glGetUniformLocation(ShaderProgID, name_var)});
+
+            if constexpr (object_type == ENGINE::SHADER::MATRIX_4) {
+                glUniformMatrix4fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+
+            } else if constexpr (object_type == ENGINE::SHADER::MATRIX_3)  {
+                glUniformMatrix3fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+
+            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_2)  {
+                glUniform2fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+
+            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_3)  {
+                glUniform3fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+
+            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_4)  {
+                glUniform4fv(it.second, 1, GL_FALSE, glm::value_ptr(value));
+
+            } else if constexpr (object_type == ENGINE::SHADER::SIMPLE_VALUE)  {
+                if constexpr (std::is_floating_point_v<T>)  {
+                    glUniform1f(it.first->second, value);
+
+                } else if constexpr (std::is_integral_v<T>)  {
+                    glUniform1i(it.first->second, value);
+                    
+                }
+            }
+        }
+    }
 
     /////////////////////////////////////////////////////////////////////////////////
     // Getters

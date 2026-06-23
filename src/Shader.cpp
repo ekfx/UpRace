@@ -304,8 +304,6 @@ void Shader::SetMat4(const char* name_var, glm::mat4 matrix_4) {
     }
 }
 
-// IMPLEMENTAR TEMPLATES FUTURAMENTE
-
 /////////////////////////////////////////////////////////////////////////////////
 // Getters
 u32 Shader::GetUniformLocation(const char* name_uniform) {

@@ -12,7 +12,7 @@ Texture::~Texture() {
 
 /////////////////////////////////////////////////////////////////////////////////
 // OpenGL Texture
-void Texture::BasicTexture(i32 texture_slot, i32 texture_type, i32 texture_interpolation_type, const char* path_image, bool flip_image, bool unbind) {
+void Texture::CreateBasicTexture(i32 texture_slot, i32 texture_type, i32 texture_interpolation_type, const char* path_image, bool flip_image, bool unbind) {
     CreateTexture(texture_slot, texture_type);
     ConfigTexture(texture_type, texture_interpolation_type);
     LoadImage(path_image, flip_image);

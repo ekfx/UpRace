@@ -40,7 +40,16 @@ namespace ENGINE {
 
     namespace PHYSICS {
         constexpr float GRAVITY_ACCELERATION    = 9.81f; 
-        constexpr float GRAVITY_ACCELERATION_8X    = GRAVITY_ACCELERATION*8;  
+        constexpr float GRAVITY_ACCELERATION_8X = GRAVITY_ACCELERATION*8;  
+    }
+
+    namespace SHADER {
+        constexpr int MATRIX_4                  = 0;
+        constexpr int MATRIX_3                  = 1;
+        constexpr int VECTOR_2                  = 2;
+        constexpr int VECTOR_3                  = 3;
+        constexpr int VECTOR_4                  = 4;
+        constexpr int SIMPLE_VALUE              = 5;
     }
 }
 

@@ -2,6 +2,7 @@
     Some wishes to practice here:
     -  multithreading
     -  macros to debug
+    -  anti AI
 */
 
 #ifndef UPRACE_H
@@ -11,6 +12,12 @@
 
 class UpRace : public Program {
 private:
+    Shader GlobalShader;
+
+    Mesh floorM;
+    Texture floorT;
+    glm::mat4 floorMd;
+
     // Vertex
     u32 MyEBO[6] {
         0, 1, 2,
