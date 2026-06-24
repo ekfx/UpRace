@@ -92,39 +92,45 @@ public:
     void SetMat4(const char* name_var, glm::mat4 matrix_4);
 
     // My first template, without AI, just me and the compiler
+    // This template dont needs to send the pointer of the structure
     template<i8 object_type, typename T>
     void SetUniform(const char* name_var, T value) {
+        Use();
         auto it_ = UniformArray.find(name_var);
-        bool end = 0;
+        GLint loc;
+        // returns end if not find the position
 
-        (it_ != UniformArray.end()) ? end = 0 : end = 1;
+        // void glUniform4fv(GLint location, GLsizei count, const GLfloat *value);
 
-        if (end) {
+        if (it_ == UniformArray.end()) {
             auto it = UniformArray.insert({name_var, glGetUniformLocation(ShaderProgID, name_var)});
+            loc = it.first->second;    // recebe o location
+        } else {
+            loc = it_->second;  // recebe location do map ja existente
+        }
 
-            if constexpr (object_type == ENGINE::SHADER::MATRIX_4) {
-                glUniformMatrix4fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
+        if constexpr (object_type == ENGINE::SHADER::MATRIX_4) {
+            glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 
-            } else if constexpr (object_type == ENGINE::SHADER::MATRIX_3)  {
-                glUniformMatrix3fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
+        } else if constexpr (object_type == ENGINE::SHADER::MATRIX_3)  {
+            glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(value));
 
-            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_2)  {
-                glUniform2fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
+        } else if constexpr (object_type == ENGINE::SHADER::VECTOR_2)  {
+            glUniform2fv(loc, 1, glm::value_ptr(value));
 
-            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_3)  {
-                glUniform3fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
+        } else if constexpr (object_type == ENGINE::SHADER::VECTOR_3)  {
+            glUniform3fv(loc, 1, glm::value_ptr(value));
 
-            } else if constexpr (object_type == ENGINE::SHADER::VECTOR_4)  {
-                glUniform4fv(it.first->second, 1, GL_FALSE, glm::value_ptr(value));
+        } else if constexpr (object_type == ENGINE::SHADER::VECTOR_4)  {
+            glUniform4fv(loc, 1, glm::value_ptr(value));
 
-            } else if constexpr (object_type == ENGINE::SHADER::SIMPLE_VALUE)  {
-                if constexpr (std::is_floating_point_v<T>)  {
-                    glUniform1f(it.first->second, value);
+        } else if constexpr (object_type == ENGINE::SHADER::SIMPLE_VALUE)  {
+            if constexpr (std::is_floating_point_v<T>)  {
+                glUniform1f(loc, value);
 
-                } else if constexpr (std::is_integral_v<T>)  {
-                    glUniform1i(it.first->second, value);
-                    
-                }
+            } else if constexpr (std::is_integral_v<T>)  {
+                glUniform1i(loc, value);
+                
             }
         }
     }

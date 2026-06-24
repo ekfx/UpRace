@@ -12,11 +12,39 @@
 
 class UpRace : public Program {
 private:
-    Shader GlobalShader;
+    // generic struct to objects
+    struct GraphicEntity {
+        glm::mat4   model;
+        Texture     tex;
+        Mesh        mesh;
 
-    Mesh floorM;
-    Texture floorT;
-    glm::mat4 floorMd;
+        GraphicEntity() {
+            model = glm::mat4(1.0f);
+        }
+    };
+
+    struct VehicleEntity {
+        f32 fx, fy, fz;
+        f32 bx, by, bz;
+        f32 vel, ang;
+    };
+
+    f32 CircuitAng = 92.6827f;
+    f32 CircuitRad = 2.0f;
+
+    Shader GlobalShader;
+    Mesh GlobalMesh;  
+    // the vertices are the same, only real difference is the 
+    // model matrix, there's no need to create one vao and vbo
+    // for each object in the screen.
+    
+    ObjectManager Objects;
+    GraphicEntity Floor;
+    GraphicEntity Circuit;
+
+    VehicleEntity KartBox;
+    GraphicEntity Kart;
+    u32 KartID;
 
     // Vertex
     u32 MyEBO[6] {
