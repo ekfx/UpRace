@@ -9,6 +9,7 @@
 #define UPRACE_H
 
 #include "Program.h"
+#include "Kart.h"
 
 class UpRace : public Program {
 private:
@@ -17,8 +18,8 @@ private:
         Texture     tex;
 
         f32 x, y;
-        f32 forward;
-        f32 vel, ang, velAng;
+        f32 vel;
+        f32 velInc, ang, velAng;
 
         Entity() {
             model = glm::mat4(1.0f);
@@ -34,10 +35,11 @@ private:
     // for each object in the screen.
     
     glm::vec3 position;
-    bool gambiarra = 0;
     ObjectManager Objects;
     Entity Kart;
     u32 KartID;
+
+    KartS PrettyKart;
 
     // Vertex
     u32 MyEBO[6] {

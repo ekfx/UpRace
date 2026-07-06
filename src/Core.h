@@ -12,6 +12,7 @@ namespace ENGINE {
     namespace DIRECTION {       
         constexpr int FORWARD                   = 1;
         constexpr int BACKWARD                  = -1;
+        constexpr int NOTHING                   = 0;
     }       
 
     namespace CAMERA {      
