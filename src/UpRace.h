@@ -10,6 +10,7 @@
 
 #include "Program.h"
 #include "Kart.h"
+#include <fstream>
 
 class UpRace : public Program {
 private:
@@ -26,6 +27,7 @@ private:
         }
     };
 
+    Texture BlackMap;
     Entity Floor;
     Entity Circuit;
     Shader GlobalShader;
@@ -33,13 +35,9 @@ private:
     // the vertices are the same, only real difference is the 
     // model matrix, there's no need to create one vao and vbo
     // for each object in the screen.
-    
-    glm::vec3 position;
-    ObjectManager Objects;
-    Entity Kart;
-    u32 KartID;
 
-    KartS PrettyKart;
+    Entity KartData;
+    Kart Kart;
 
     // Vertex
     u32 MyEBO[6] {

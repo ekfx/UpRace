@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <random>
+#include <print>
 
 #include "Shader.h"
 #include "Timer.h"

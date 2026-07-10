@@ -1,6 +1,6 @@
 # Detecta Windows/Linux
 ifeq ($(OS), Windows_NT)
-    CXX = g++
+	  CXX = x86_64-w64-mingw32-g++ -std=c++23
     CXXFLAGS = -Iinclude -MMD -MP -O0 -g0 -pipe
     LDFLAGS = -Llib-mingw-w64 -lglfw3dll -lopengl32 -lgdi32 -lwinmm -mconsole
     OUT = build/program.exe

@@ -1,5 +1,6 @@
 #define APPLICATION_DEBUG_MODE
 // para release é necessario apenas omitir define.
+
 #include <iostream>
 #include "UpRace.h"
 
@@ -10,6 +11,6 @@ int main() {
 
     UpRace Game;
     Game.Loop(); 
-    
+
     return 0;
 }
