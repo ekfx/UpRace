@@ -9,6 +9,18 @@ void UpRace::InitEnvironment()
         ler .ini que contenha todo caminho para textura e tenha definicoes para 
         criacao do jogo.
     */
+
+    
+    EnvConfig.ReadIniArchive("../settings/settings.ini");
+    
+    Settings.ReadIniArchive(Actors.at(EnvConfig.GetConfigValue("kart_num")));
+    Kart.SetConfig(Settings.GetConfigs());
+    
+    SettingsStr.Init(std::filesystem::path(Environment.at(EnvConfig.GetConfigValue("env_num"))));
+    background = SettingsStr.GetValue("background");
+    circuit = SettingsStr.GetValue("circuit");
+    bitmask = SettingsStr.GetValue("bitmask");
+    skin = SettingsStr.GetValue("skin");
 }
 
 void UpRace::Initialize() 
@@ -16,14 +28,21 @@ void UpRace::Initialize()
     GlobalShader.CreateBasicShaders("shaders/shaders.vert", "shaders/shaders.frag");
     GlobalMesh.CreateMesh(MyVertex, sizeof(MyVertex), MyEBO, sizeof(MyEBO), 1, 1, 0, 1);
 
-    Floor.tex.CreateBasicTexture(GL_TEXTURE0, GL_TEXTURE_2D, GL_LINEAR, "../assets/floor_.png", 1, 0);
-    Circuit.tex.CreateBasicTexture(GL_TEXTURE1, GL_TEXTURE_2D, GL_LINEAR, "../assets/circuit1.png", 1, 0);
+    Floor.tex.CreateBasicTexture(GL_TEXTURE0, GL_TEXTURE_2D, GL_LINEAR, background.string().c_str(), 1, 0);
+    Circuit.tex.CreateBasicTexture(GL_TEXTURE1, GL_TEXTURE_2D, GL_LINEAR, circuit.string().c_str(), 1, 0);
     
-    KartData.tex.CreateBasicTexture(GL_TEXTURE2, GL_TEXTURE_2D, GL_LINEAR, "../assets/kart1.png", 1, 0);
+    KartData.tex.CreateBasicTexture(GL_TEXTURE2, GL_TEXTURE_2D, GL_LINEAR, skin.string().c_str(), 1, 0);
 
-    BlackMap.LoadImage("../assets/black_map1.png", false);
+    BlackMap.LoadImage(bitmask.string().c_str(), false);
 
-    Kart.Start(0.65f, 0.0f);
+    ekSound.Init();
+    
+    ekHUD.Start(GetWindowHandle());
+    ekHUD.SetCustomRenderFunction([&](){
+        ImGui::Begin("UpRace", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize);
+        ImGui::Text("Velocity: %f", Kart.GetVel()*100);
+        ImGui::End();
+    });
 }
 
 void UpRace::Input(GLFWwindow* window, f32 Delta) 
@@ -49,8 +68,14 @@ void UpRace::Input(GLFWwindow* window, f32 Delta)
     // f32 PCoorX = -1.50f + ((Kart.GetX() - 0.0f) * (1.50f - (-1.50f))) / 4096.0f - 0;
     // f32 PCoorY = -1.50f + ((Kart.GetY() - 0.0f) * (1.50f - (-1.50f))) / 4096.0f - 0;
  
-    i32 PCoorX = ((Kart.GetX() + 1.00f) * 4096) / 2.0f;
-    i32 PCoorY = ((Kart.GetY() + 1.00f) * 4096) / 2.0f;
+    i32 PCoorX = ((Kart.GetX() + EnvConfig.GetConfigValue("spaceSizeW")) * 4096) / 2.0f;
+    i32 PCoorY = ((Kart.GetY() + EnvConfig.GetConfigValue("spaceSizeH")) * 4096) / 2.0f;
+
+    /*
+      Proximas ideias: posso pegar um bitmask e criar zonas 
+      de velocidade para quando carro passar e for cor amarela por exemplo
+      ele ganhe velocidade.
+    */
 
     if (BlackMap.isPixelBlack(PCoorX, PCoorY)) {
       if (Keyboard::isKeyPressed(GLFW_KEY_W)) {
@@ -58,16 +83,23 @@ void UpRace::Input(GLFWwindow* window, f32 Delta)
       } else if (Keyboard::isKeyPressed(GLFW_KEY_S)) {
           Kart.Run(ENGINE::DIRECTION::BACKWARD, Delta);
       }
-
-      if (Keyboard::isKeyPressed(GLFW_KEY_A)) {
-         Kart.Turn(ENGINE::DIRECTION::FORWARD, Delta);
-      } else if (Keyboard::isKeyPressed(GLFW_KEY_D)) {
-          Kart.Turn(ENGINE::DIRECTION::BACKWARD, Delta);
-      }
     }
+
+    if (Keyboard::isKeyPressed(GLFW_KEY_A)) {
+       Kart.Turn(ENGINE::DIRECTION::FORWARD, Delta);
+    } else if (Keyboard::isKeyPressed(GLFW_KEY_D)) {
+        Kart.Turn(ENGINE::DIRECTION::BACKWARD, Delta);
+    }
+    
 
     Kart.Run(ENGINE::DIRECTION::NOTHING, Delta);
     Kart.Turn(ENGINE::DIRECTION::NOTHING, Delta);
+
+    // Kart.ShowData();
+
+    //for (i32 i = 0; i < (i32)(Kart.GetVel()*10); i++) {
+    //  ekSound.SCPlaySound(std::filesystem::path("../assets/sound/engine.mp3").string().c_str());
+    //};
 }
 
 void UpRace::ProcessPhysics(f32 Delta) 
@@ -111,8 +143,10 @@ void UpRace::Render()
     
     glBindTexture(GL_TEXTURE_2D, KartData.tex.GetTextureID());
     GlobalShader.SetUniform<ENGINE::SHADER::SIMPLE_VALUE, i32>("TexSlot", 2);
-    GlobalShader.SetUniform<ENGINE::SHADER::MATRIX_4, glm::mat4>("model", glm::scale(Kart.GetModel(), glm::vec3(0.005f)));
+    GlobalShader.SetUniform<ENGINE::SHADER::MATRIX_4, glm::mat4>("model", glm::scale(Kart.GetModel(), glm::vec3(0.05f)));
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void*)0);
+
+    ekHUD.Run(GetWindowWidth(), GetWindowHeight(), 0);
 }
 
 void UpRace::Release() 
@@ -123,4 +157,6 @@ void UpRace::Release()
     GlobalShader.ReleaseShaders();
     GlobalMesh.ReleaseBuffers();
     BlackMap.ReleaseData();
+    ekSound.Release();
+    ekHUD.Release();
 }

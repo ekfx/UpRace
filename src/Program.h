@@ -16,7 +16,7 @@
 #include <vector>
 #include <string>
 #include <random>
-#include <print>
+#include <filesystem>
 
 #include "Shader.h"
 #include "Timer.h"
@@ -34,6 +34,7 @@
 #include "Sound.h"
 #include "HUD.h"
 #include "ExtConfig.h"
+#include "ExtConfigStr.h"
 
 class Program {
 private:

@@ -8,20 +8,20 @@ IniReader::~IniReader()
 {
 }
 
-void IniReader::ReadIniArchive(const char* path_and_name) {
+bool IniReader::ReadIniArchive(const std::filesystem::path& path_and_name) {
     std::string     line             = "";
     std::string     t_line_value     = "";
     std::string     t_line           = "";
     float           t_value          = 0;
     bool            point_trigger    = 0;
 
-    IniArchive.open(path_and_name);
+    IniArchive.open(path_and_name.string());
     if (IniArchive.is_open()) {
 
         while (std::getline(IniArchive, line)) {
             if (line.empty()) { // .empty() verifica se esta vazia
                 /*Nada*/
-            } else if (((line[0] == '/') && (line[1] == '/')) || (line[0] == ' ')) {  
+            } else if ((line[0] == '#') || (line[0] == ' ')) {  
                 /*Nada*/
             }
             else { 
@@ -46,11 +46,16 @@ void IniReader::ReadIniArchive(const char* path_and_name) {
             t_value             = 0;
             point_trigger       = 0;
         }
+    } else {
+      infoLog += "INIREADER::COULDNT_OPEN_FILE\n";
+      return -1;
     }
     IniArchive.close();
+
+    return 0;
 }
 
-float IniReader::GetConfigValue(std::string config) {
+float IniReader::GetConfigValue(const std::string& config) {
     auto it = Configs.find(config);
     std::map<std::string, float>::iterator null_it{};   // iterador nulo
 

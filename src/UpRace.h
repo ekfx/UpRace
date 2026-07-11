@@ -10,7 +10,6 @@
 
 #include "Program.h"
 #include "Kart.h"
-#include <fstream>
 
 class UpRace : public Program {
 private:
@@ -38,6 +37,31 @@ private:
 
     Entity KartData;
     Kart Kart;
+    IniReader EnvConfig;
+    // std::ofstream AI;
+    
+    std::filesystem::path background;
+    std::filesystem::path circuit;
+    std::filesystem::path bitmask;
+    std::filesystem::path skin;
+
+    IniReader Settings;
+    StrIniReader SettingsStr;
+
+    std::vector<std::string> Environment {
+      "../settings/setup1.ini",
+      "../settings/setup2.ini",
+      "../settings/setup3.ini",
+      "../settings/setup4.ini"
+    };
+
+    std::vector<std::string> Actors = {
+      "../settings/kart1.ini",
+      "../settings/kart2.ini",
+      "../settings/kart3.ini",
+      "../settings/kart4.ini"
+    };
+
 
     // Vertex
     u32 MyEBO[6] {

@@ -118,10 +118,6 @@ bool Texture::isPixelBlack(i64 x, i64 y) {
     b = ImageData[offset + 2];
     a = ImageData[offset + 3];
     // apenas move o indice;
-    
-    // if (x == 583 && y == 2009) {
-    std::cout << "\n -> VALORES REAIS NA MEMÓRIA -> R:" << (int)r << " G:" << (int)g << " B:" << (int)b << "\n";
-    // }
 
     if ((r <= 32) && (g <= 32) && (b <= 32)) {
         return true;

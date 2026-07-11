@@ -1,7 +1,11 @@
+#ifndef EXTCONFIG_H
+#define EXTCONFIG_H
+
 #include <iostream>
 #include <fstream>
 #include <map>
 #include <string>   
+#include <filesystem>
 
 class IniReader {
 private:
@@ -13,8 +17,10 @@ public:
     IniReader();
     ~IniReader();
 
-    void ReadIniArchive(const char* path_and_name);
-    float GetConfigValue(std::string config);
+    bool ReadIniArchive(const std::filesystem::path& path_and_name);
+    float GetConfigValue(const std::string& config);
     std::map<std::string, float>& GetConfigs();
 
 };
+
+#endif

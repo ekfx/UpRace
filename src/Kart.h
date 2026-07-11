@@ -11,13 +11,14 @@
 #include <glm/trigonometric.hpp>
 #include <glm/common.hpp>
 #include <utility>
+#include <map>
 #include "Core.h"
 
 class Kart {
 private:
     float X, Y, Z;  // Z is not functional, but I put here to stay vec3
     float Vel, VelAng, VelInc, VelIncAng;
-    float VelMax, VelAngMax;
+    float rpmMax, VelAngMax, rpm;
     float VelInertia, VelAngInertia;
     float Power;
 
@@ -27,9 +28,10 @@ private:
 public:
     Kart() {
         Vel             = 0;
-        VelMax          = 100.5f;
+        rpmMax          = 8000.0f;
         VelInc          = 20.55f;
         VelInertia      = 0.75f;
+        rpm             = 1600.0f;
 
         VelAng          = 0;
         VelAngMax       = 5.85f;   // em angulos
@@ -46,18 +48,19 @@ public:
 
     void Run(int direction, float delta) {
         if (direction == ENGINE::DIRECTION::FORWARD) {
-            if (Vel < VelMax) Vel += VelInc*delta;
+            if (rpm < rpmMax) rpm += 500.0f*delta;
+            
+            Vel += ((rpmMax-rpm)/10000.0f)*delta;
             // VelInc -= Vel*delta;
 
         } else if (direction == ENGINE::DIRECTION::BACKWARD) {
-            if (Vel > -VelMax) Vel -= VelInc*delta;
+            if (rpm > -rpmMax) rpm -= 500.0f*delta;
+
+            Vel -= ((rpmMax-rpm)/10000.0f)*delta;
             // VelInc -= Vel*delta;
 
         } else if (direction == ENGINE::DIRECTION::NOTHING) {
-            Vel = Vel*VelInertia;
-            if (VelInc < 0.15f) {
-                VelInc = VelInc*1.5f;
-            }
+            rpm = rpm*VelInertia;
         }
     }
 
@@ -87,6 +90,8 @@ public:
 
         //Vel = VelInc;
         //VelAng = VelIncAng;
+        
+        Vel = Vel*VelInertia;
 
         float x_axis = Vel * tan(VelAng);
         float h = sqrt(Vel*Vel + x_axis*x_axis);
@@ -97,7 +102,7 @@ public:
         Y = model[3][1];
         Z = model[3][2];
 
-        // ShowData();
+        ShowData();
         
         model = glm::rotate(model, VelAng, glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::translate(model, directionVector);
@@ -106,6 +111,29 @@ public:
     std::pair<int, int> ConvertToImageScale(float x_old, float y_old, float width_space, float height_space, float width_scale, float height_scale) {
         return {((x_old + (width_space/2) * width_scale) / width_space), 
                 ((y_old + (height_space/2) * height_scale) / height_space)};
+    }
+
+    bool SetConfig(std::map<std::string, float>& config) {
+      if (config.empty()) {
+        return -1;
+      } else {
+        Vel = config["Vel"];
+        rpmMax = config["rpmMax"];
+        rpm = config["rpm"];
+        VelInc = config["VelInc"];
+        VelInertia = config["VelInertia"];
+
+        VelAng = config["VelAng"];
+        VelAngMax = config["VelAngMax"];
+        VelIncAng = config["VelIncAng"];
+        VelAngInertia = config["VelAngInertia"];
+
+        float t_x = config["initialX"];
+        float t_y = config["initialY"];
+        model = glm::translate(model, glm::vec3(t_x, t_y, 0.0f));
+
+        return 0;
+      }
     }
 
     glm::mat4 GetModel() {
@@ -124,8 +152,12 @@ public:
         return Z;
     }
 
+    float GetVel() {
+      return Vel;
+    }
+
     void ShowData() {
-        std::cout << "\rX: " << X << " - Y: " << Y << " - Z: " << Z << " - Vel: " << Vel << " - VelAng: " << VelAng << std::endl;
+        std::cout << "\rX: " << X << " - Y: " << Y << " - Z: " << Z << " - Vel: " << Vel << " - VelAng: " << VelAng << " - rpm: " << rpm << " - rpmMax: " << rpmMax << std::endl;
     }
  };
 
