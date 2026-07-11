@@ -1,3 +1,4 @@
+![Game Screenshot](assets/screenshot-github.png)
 # UpRace!
 Top-Down race project. A game that I will try to create a circuit that you need to win against some (coming soon) bots.
 A simple game, still not complete. But I want to create a cool gameplay, something better than all projects I've made.
