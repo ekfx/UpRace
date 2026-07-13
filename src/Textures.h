@@ -39,6 +39,8 @@ public:
     GLuint GetTextureID();
     void ReleaseData();
     bool isPixelBlack(i64 x, i64 y);
+    i32 GetWidth();
+    i32 GetHeight();
 };
 
 #endif //TEXTURES_H

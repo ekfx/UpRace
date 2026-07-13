@@ -125,3 +125,11 @@ bool Texture::isPixelBlack(i64 x, i64 y) {
         return false;
     }
 }
+
+i32 Texture::GetWidth() {
+  return ImageWidth;
+}
+
+i32 Texture::GetHeight() {
+  return ImageHeight;
+}

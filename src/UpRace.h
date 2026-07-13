@@ -1,6 +1,6 @@
 /*
     Some wishes to practice here:
-    -  multithreading
+    -  multithreading (dont have reasons to use, discard)
     -  macros to debug
     -  anti AI
 */
@@ -35,8 +35,12 @@ private:
     // model matrix, there's no need to create one vao and vbo
     // for each object in the screen.
 
-    Entity KartData;
-    Kart Kart;
+    f32 spaceMaxW;
+    f32 spaceMaxH;
+    Entity KartData0;
+    Kart Kart0;
+    Entity KartData1;
+    Kart Kart1;
     IniReader EnvConfig;
     // std::ofstream AI;
     

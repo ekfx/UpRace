@@ -19,7 +19,7 @@ public:
     // Utilitarios
     bool Init();    // thanks to SplinterOfChaos if you're seeing it
     void Release();
-    void SCPlaySound(const char* audio_path); // tocar som simples
+    void _PlaySound(const char* audio_path); // tocar som simples
 
 };
 

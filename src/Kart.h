@@ -17,10 +17,12 @@
 class Kart {
 private:
     float X, Y, Z;  // Z is not functional, but I put here to stay vec3
-    float Vel, VelAng, VelInc, VelIncAng;
+    float Vel, VelInc;
+    float VelAng, VelIncAng;
     float rpmMax, VelAngMax, rpm;
     float VelInertia, VelAngInertia;
     float Power;
+    float i_x, i_y;
 
     glm::mat4 model;
     unsigned int TexSlot;
@@ -117,23 +119,63 @@ public:
       if (config.empty()) {
         return -1;
       } else {
-        Vel = config["Vel"];
-        rpmMax = config["rpmMax"];
-        rpm = config["rpm"];
-        VelInc = config["VelInc"];
-        VelInertia = config["VelInertia"];
+        Vel                      = config["Vel"];
+        rpmMax                   = config["rpmMax"];
+        rpm                      = config["rpm"];
+        VelInc                   = config["VelInc"];
+        VelInertia               = config["VelInertia"];
 
-        VelAng = config["VelAng"];
-        VelAngMax = config["VelAngMax"];
-        VelIncAng = config["VelIncAng"];
-        VelAngInertia = config["VelAngInertia"];
+        VelAng                   = config["VelAng"];
+        VelAngMax                = config["VelAngMax"];
+        VelIncAng                = config["VelIncAng"];
+        VelAngInertia            = config["VelAngInertia"];
 
-        float t_x = config["initialX"];
-        float t_y = config["initialY"];
-        model = glm::translate(model, glm::vec3(t_x, t_y, 0.0f));
+        i_x                      = config["initialX"];
+        i_y                      = config["initialY"];
+        model = glm::translate(model, glm::vec3(i_x, i_y, 0.0f));
 
         return 0;
       }
+    }
+
+    // returns the kart position to the new image position, or anything new scale
+    int GetRelativeCoord(int axis, float old_max, float new_scale_size) {
+        /*
+            We have: a X value that is in our coordinate system,
+            that runs from -1,50 to +1,50, and we need to convert 
+            to the imagem system that goes from 0 to 4096 in height 
+            and width (so x and y are the same).
+
+            Following the formula: Xc = C + ((Xo - A) * (D - C))/B - A
+            Being:
+                A - the old minimum
+                B - the old maximum 
+                C - the new minimum
+                D - the new maximum
+
+            so, changing their values:
+                Xc = -1.50 + ((Xo - 0) * (+1.50 (-1.50))) / 4096 - 0
+            Being Xc -> X converted and Xo -> X old.
+
+            f32 PCoorY = -1.50f + ((Kart.GetY() - 0.0f) * (1.50f - (-1.50f))) / 4096.0f - 0;
+        */
+
+        if (axis == ENGINE::AXIS::X_AXIS) {
+            return ((X + old_max) * new_scale_size) / (old_max * 2);
+        } else if (axis == ENGINE::AXIS::Y_AXIS) {
+            return ((Y + old_max) * new_scale_size) / (old_max * 2);
+        } else {
+            return 0;
+        }
+    }
+
+    void Freeze() {
+      Vel = 0;
+    }
+
+    void ResetPos() {
+      model = glm::mat4(1.0f);
+      model = glm::translate(model, glm::vec3(i_x, i_y, 0.0f));
     }
 
     glm::mat4 GetModel() {

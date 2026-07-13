@@ -17,7 +17,16 @@
 #include <string>
 #include <random>
 #include <filesystem>
+#include <fstream>
+#include <map>
+#include <expected>
+#include <optional>
+#include <memory>
+#include <variant>
+#include <type_traits>
+#include <cstdint>
 
+#include "Configurator.hpp"
 #include "Shader.h"
 #include "Timer.h"
 #include "Clock.h"

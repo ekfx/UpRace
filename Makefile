@@ -1,12 +1,21 @@
 # Detecta Windows/Linux
 ifeq ($(OS), Windows_NT)
-	  CXX = x86_64-w64-mingw32-g++ -std=c++23
+    #CXX = g++ -std=c++23 
+    #CXXFLAGS = -Iinclude -MMD -MP -O0 -g0 -pipe
+    #LDFLAGS = -Llib-mingw-w64 -lglfw3dll -lopengl32 -lgdi32 -lwinmm -mconsole
+    #OUT = build/program.exe
+    #MKDIR = if not exist build mkdir build
+    #RM = rmdir /s /q build
+    #CP_ASSETS = copy lib-mingw-w64\glfw3.dll build\ && xcopy /E /I /Y shaders build\shaders
+
+    # to use with w64devkit with the C++26
+    CXX = g++ -std=c++26 -freflection
     CXXFLAGS = -Iinclude -MMD -MP -O0 -g0 -pipe
     LDFLAGS = -Llib-mingw-w64 -lglfw3dll -lopengl32 -lgdi32 -lwinmm -mconsole
     OUT = build/program.exe
-    MKDIR = if not exist build mkdir build
-    RM = rmdir /s /q build
-    CP_ASSETS = copy lib-mingw-w64\glfw3.dll build\ && xcopy /E /I /Y shaders build\shaders
+    MKDIR = mkdir -p build
+    RM = rm -r build
+    CP_ASSETS = cp lib-mingw-w64/glfw3.dll build/
 else
     CXX = g++
     CXXFLAGS = -Iinclude -MMD -MP -O0 -g0 -pipe
@@ -57,3 +66,5 @@ clean:
 	$(RM)
 
 .PHONY: all clean copy_assets
+
+

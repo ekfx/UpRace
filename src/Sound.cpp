@@ -20,10 +20,17 @@ bool SoundCore::Init() {
 
 void SoundCore::Release() {
     ma_engine_uninit(&engineSoundCore);
-    // verificação de anulidade ja é feita dentro do codigo minisound
+    // the null verification is already in the function
+    /*
+77799    if (pEngine == NULL) {
+77800        return;
+77801    }
+    */
 }
 
-void SoundCore::SCPlaySound(const char* audio_path) {
+void SoundCore::_PlaySound(const char* audio_path) {
+    // the name is strange because the standard windows function that have
+    // the name PlaySound
     if (statusSoundCore == MA_SUCCESS) {
         ma_engine_play_sound(&engineSoundCore, audio_path, NULL);
     }
