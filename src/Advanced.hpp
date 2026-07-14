@@ -1,4 +1,5 @@
-#ifdef CXX26_DEBUG
+#define CXX26_DEBUG
+#ifndef CXX26_DEBUG
 
 #include <iostream>
 #include <filesystem>
@@ -79,27 +80,119 @@ std::string_view GetError(const u_type& raw_error) {
 
 // this returns the success value if there's no error
 // DOESN'T WORK YET
-#ifdef WORKING_FUNCTIONS
-    template<typename u_type>
-    std::variant<std::string_view, float, std::string, int, bool, double> IsError(const u_type& raw_error) {
+/*
+    Needs to passa the RAW VALUE as return; but there's a problem:
+    we need to know which is this type, OR give the value as parameter,
+    what in my opinion is ugly and less good to use.
+
+    I saw in the stack overflow a suggestion:
+    questions: 1358427 › function-which-returns-an-unknown-type
+    "You can use boost::any or boost::variant to do what you want. 
+    I recommend boost::variant because you know the collection of types you want to return."
+    Yes but I wouldn't like use this non standard libraries, maybe SFINAE or concepts
+    would help in it, creating overloaded functions, but I don't know. I'll try.
+*/
+template<typename u_type, typename u_val>
+std::string_view err(const u_type& raw_error, u_val& target) {
+    /*
+        If you wanna use one of these, use that, is the best one
+        and is easy to understand:
+        1. We get the RAW_ERROR and the TARGET (that will receive the 
+        value).
+        2. We verify if is success, if true, TARGET receive the value
+        and return SUCCESS.
+        3. Else, we do a compiling time for loop passing for all enumerators 
+        of ERRORCODE (after we transformed it into an array to the compiler)
+        checking for one that matches with our error, turning the current meta
+        member of the array a data inside our program and comparing with 
+        the error, which both are hexadecimal, so the comparasion is possible.
+        4. If matches, we get the member and get its identifier e return as
+        string_view.
+        5. If none of that steps runs successfuly, it means that is a unknown
+        error.
+    */
+    ERRORCODE error;
+    error = raw_error.error_or(ERRORCODE::SUCCESS);
+    if (error == ERRORCODE::SUCCESS) {
+        // caso seja sucesso:
+        target = raw_error.value();
+        return std::string_view(std::meta::identifier_of(^^ERRORCODE::SUCCESS));
+    } else {    // se for erro.
+
+        template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
+            if ([:member:] == error) {
+                return std::string_view(std::meta::identifier_of(member));
+            }
+        }
+
+        return std::string_view("UNKNOWN_ERROR");
+    }
+}
+
+// ATTENTION: probably those functions DON'T WORK and DOESN'T COMPILE.
+#ifdef NOT_WORKING_FUNCTIONS
+
+    template<typename u_type, typename u_val>
+    consteval bool IsError(const u_type& raw_error, u_val& target) {
         ERRORCODE error;
         error = raw_error.error_or(ERRORCODE::SUCCESS);
         if (error == ERRORCODE::SUCCESS) {
-            // caso seja sucesso:
-            auto val = raw_error.value();
-            return ;
-
-        } else {    // se for erro.
-
-            template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
-                if ([:member:] == error) {
-                    return std::string_view(std::meta::identifier_of(member));
-                }
-            }
-    
-            return std::string_view("UNKNOWN_ERROR");
+            target = raw_error.value();
+            return false;
+        } else {    
+            return true;
         }
     }
+
+    /*
+        https://gkteco.medium.com/using-c-concepts-for-great-good-part-1-2ae42c7a0d6d
+        template<typename T>
+        concept Showable = requires(T& t, std::ostream& os) {
+            {os << t} -> std::same_as<std::ostream&>; 
+        };
+
+        << é um operador de fluxo, é como se fosse colocar um dado dentro do outro.
+        ali testa se o std::ostream& aceitaria um tipo T como entrada, mas como ele faz?
+        ele faz direto o deslocamento de fluxo com << dentro de chaves (ou seja, modificou o valor
+        de ostream) e depois verifica se o TIPO DE ENDEREÇO (não o tipo em si) é o mesmo
+        que um std::ostream& pegando o tipo de retorno com ->. Caso NAO SEJA POSSIVEL
+        fazer "os << t" ela para ali mesmo e retorna false, o que significa que não vai nem chegar na seta.
+        é como um if:
+        if {os << t} { std::same_as<std::ostream&>; }
+        ou
+        if is_possible {os << t} get_result_to { if same_as<ostream&> return true }
+        if          true            ->          same_as<tipo>   return true
+        Mas há um porém, a parte {os << t} apenas checa se É POSSIVEL FAZER esse deslocamento,
+        se for mal formado, porém, passará na regra. Para verificar o resultado pegamos o
+        resultado com -> e fazemos uma comparação (é como se fosse um ==) com std::same_as<std::ostream&>
+        ou seja, verificando se o tipo é igual (note que é um tipo de ENDERECO). Se a regra
+        foi cumprida, isto é, retornou true, fica implicito.
+    */
+
+    // INTEGRAL
+    template<typename err_type>
+    concept tpInt = requires(const err_type& object_error) { 
+        {object_error.value()} -> std::same_as<int&>; 
+    };
+    
+    template<typename err_type>
+    concept expctType = requires(const err_type& object_error) { 
+        object_error.value();
+    };
+
+    template<expctType err_type>
+    
+    auto err(const err_type& error) -> decltype(error.value(std::string_view(""))) { 
+        decltype(error.value_or(error.error())) t_value{0}; 
+        if constexpr (IsError(error, t_value)) {
+            return StrError(error, t_value);
+        } else {
+            return t_value; 
+        }
+    };
+    
+
+    
 #endif
 
 #endif //CXX26_DEBUG
