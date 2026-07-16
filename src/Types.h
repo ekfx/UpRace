@@ -4,6 +4,7 @@
 #include <cstdint>
 
 //Quanto maior os bits, maior tamanho pode comportar
+// algo como: 2^8 = 512 numeros diferentes
 using u8 = uint8_t;   // short unsigned
 using u16 = uint16_t;   // short unsigned
 using u32 = uint32_t;   // Mais usado no OpenGL

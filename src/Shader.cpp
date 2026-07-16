@@ -12,7 +12,7 @@ Shader::~Shader()
 // Config
 
 // Make a Basic shaders from default directories
-void Shader::CreateBasicShaders(std::string path_vertex, std::string path_fragment) {
+void Shader::CreateBasicShaders(const std::string& path_vertex, const std::string& path_fragment) {
     ProcessVertexShader(path_vertex);
     CompileVertexShader(GetVertexShader().c_str());
 

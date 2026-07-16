@@ -1,5 +1,27 @@
-#define CXX26_DEBUG
-#ifndef CXX26_DEBUG
+#ifndef ADVANCED_HPP
+#define ADVANCED_HPP
+
+/*
+    This is my header that contains all my meta functions
+    to debug better the code. For more info, acess:
+    ekfx.github.io/eriksander-code/news.html
+
+    If you wanna use one of these, use the FUNCTION NUMBER 1, is the best one
+    and is easy to understand:
+    1. We get the RAW_ERROR and the TARGET (that will receive the 
+    value).
+    2. We verify if is success, if true, TARGET receive the value
+    and return SUCCESS.
+    3. Else, we do a compiling time for loop passing for all enumerators 
+    of ERRORCODE (after we transformed it into an array to the compiler)
+    checking for one that matches with our error, turning the current meta
+    member of the array a data inside our program and comparing with 
+    the error, which both are hexadecimal, so the comparasion is possible.
+    4. If matches, we get the member and get its identifier e return as
+    string_view.
+    5. If none of that steps runs successfuly, it means that is a unknown
+    error.
+*/
 
 #include <iostream>
 #include <filesystem>
@@ -14,14 +36,139 @@
 #include <type_traits>
 #include <cstdint>
 
+// you can create your own types of error:
 enum class ERRORCODE : std::uint16_t{
-    SUCCESS              = 0x000,
-    ERROR                = 0xfff,
-    FILE_DONT_EXIST      = 0x001,
-    COULDNT_OPEN_FILE    = 0x002,
-    INVALID_READ         = 0x003,
-    NOT_FOUND_KEY        = 0x004
+    // Global
+    SUCCESS              = 0x0000,
+    ERROR                = 0xffff,
+
+    // Configurator.hpp
+    FILE_DONT_EXIST      = 0x0001,
+    COULDNT_OPEN_FILE    = 0x0002,
+    INVALID_READ         = 0x0003,
+    NOT_FOUND_KEY        = 0x0004
 };
+
+// FUNCTION NUMBER 1
+// this returns the error and puts the value in a parameter
+template<typename u_type, typename u_val>
+std::string_view err(const u_type& raw_error, u_val& target) {
+    ERRORCODE error;
+    error = raw_error.error_or(ERRORCODE::SUCCESS);
+    if (error == ERRORCODE::SUCCESS) {
+        // caso seja sucesso:
+        target = raw_error.value();
+        return std::string_view(std::meta::identifier_of(^^ERRORCODE::SUCCESS));
+    } else {    // se for erro.
+
+        template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
+            if ([:member:] == error) {
+                return std::string_view(std::meta::identifier_of(member));
+            }
+        }
+
+        return std::string_view("UNKNOWN_ERROR");
+    }
+}
+
+// FUNCTION NUMBER 1.1
+// This receive just ERRORCODE and return the error.
+inline std::string_view err(const ERRORCODE& error) {
+    if (error == ERRORCODE::SUCCESS) 
+        return std::string_view(std::meta::identifier_of(^^ERRORCODE::SUCCESS));
+
+    template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
+        if ([:member:] == error) {
+            return std::string_view(std::meta::identifier_of(member));
+        }
+    }
+
+    return std::string_view("UNKNOWN_ERROR");
+}
+
+// FUNCTION NUMBER 2
+// this returns the value and puts the error in the parameter
+// I don't make sure this one works correctly
+template<typename u_type, typename u_val>
+auto err(const u_type& raw_error, std::string_view& target) -> decltype(raw_error.value()) {
+    ERRORCODE error;
+    error = raw_error.error_or(ERRORCODE::SUCCESS);
+    if (error == ERRORCODE::SUCCESS) {
+        // caso seja sucesso:
+        target = std::string_view(std::meta::identifier_of(^^ERRORCODE::SUCCESS));
+        return raw_error.value();
+    } else {    // se for erro.
+
+        template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
+            if ([:member:] == error) {
+                target = std::string_view(std::meta::identifier_of(member));
+            }
+        }
+
+        target = std::string_view("UNKNOWN_ERROR");
+        return -1;  // in every fail, return -1;
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// FUNCTION NUMBER 3
+// this just returns the message if fail or success
+template<typename u_type>
+std::string_view GetError(const u_type& raw_error) {
+    ERRORCODE error;
+    error = raw_error.error_or(ERRORCODE::SUCCESS);
+
+    template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
+        if ([:member:] == error) {
+            return std::string_view(std::meta::identifier_of(member));
+        }
+    }
+
+    return std::string_view("UNKNOWN_ERROR");
+}
+
+// ATTENTION: probably those functions DON'T WORK and DOESN'T COMPILE.
+#ifdef NOT_WORKING_FUNCTIONS
+
+    template<typename u_type, typename u_val>
+    consteval bool IsError(const u_type& raw_error, u_val& target) {
+        ERRORCODE error;
+        error = raw_error.error_or(ERRORCODE::SUCCESS);
+        if (error == ERRORCODE::SUCCESS) {
+            target = raw_error.value();
+            return false;
+        } else {    
+            return true;
+        }
+    }
+
+    // INTEGRAL
+    template<typename err_type>
+    concept tpInt = requires(const err_type& object_error) { 
+        {object_error.value()} -> std::same_as<int&>; 
+    };
+    
+    template<typename err_type>
+    concept expctType = requires(const err_type& object_error) { 
+        object_error.value();
+    };
+
+    template<expctType err_type>
+    
+    auto err(const err_type& error) -> decltype(error.value(std::string_view(""))) { 
+        decltype(error.value_or(error.error())) t_value{0}; 
+        if constexpr (IsError(error, t_value)) {
+            return StrError(error, t_value);
+        } else {
+            return t_value; 
+        }
+    };
+    
+
+    
+#endif // NOT_WORKING_FUNCTIONS
+#endif // ADVANCED_HPP
 
 /*
     As you can see, this is a debug function that uses reflection and metaprogramming
@@ -63,23 +210,31 @@ enum class ERRORCODE : std::uint16_t{
     thanks to Marek Polacek who answered my bug report.
 */
 
-// this just returns if fail or success
-template<typename u_type>
-std::string_view GetError(const u_type& raw_error) {
-    ERRORCODE error;
-    error = raw_error.error_or(ERRORCODE::SUCCESS);
+/*
+    https://gkteco.medium.com/using-c-concepts-for-great-good-part-1-2ae42c7a0d6d
+    template<typename T>
+    concept Showable = requires(T& t, std::ostream& os) {
+        {os << t} -> std::same_as<std::ostream&>; 
+    };
 
-    template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
-        if ([:member:] == error) {
-            return std::string_view(std::meta::identifier_of(member));
-        }
-    }
+    << é um operador de fluxo, é como se fosse colocar um dado dentro do outro.
+    ali testa se o std::ostream& aceitaria um tipo T como entrada, mas como ele faz?
+    ele faz direto o deslocamento de fluxo com << dentro de chaves (ou seja, modificou o valor
+    de ostream) e depois verifica se o TIPO DE ENDEREÇO (não o tipo em si) é o mesmo
+    que um std::ostream& pegando o tipo de retorno com ->. Caso NAO SEJA POSSIVEL
+    fazer "os << t" ela para ali mesmo e retorna false, o que significa que não vai nem chegar na seta.
+    é como um if:
+    if {os << t} { std::same_as<std::ostream&>; }
+    ou
+    if is_possible {os << t} get_result_to { if same_as<ostream&> return true }
+    if          true            ->          same_as<tipo>   return true
+    Mas há um porém, a parte {os << t} apenas checa se É POSSIVEL FAZER esse deslocamento,
+    se for mal formado, porém, passará na regra. Para verificar o resultado pegamos o
+    resultado com -> e fazemos uma comparação (é como se fosse um ==) com std::same_as<std::ostream&>
+    ou seja, verificando se o tipo é igual (note que é um tipo de ENDERECO). Se a regra
+    foi cumprida, isto é, retornou true, fica implicito.
+*/
 
-    return std::string_view("UNKNOWN_ERROR");
-}
-
-// this returns the success value if there's no error
-// DOESN'T WORK YET
 /*
     Needs to passa the RAW VALUE as return; but there's a problem:
     we need to know which is this type, OR give the value as parameter,
@@ -92,107 +247,3 @@ std::string_view GetError(const u_type& raw_error) {
     Yes but I wouldn't like use this non standard libraries, maybe SFINAE or concepts
     would help in it, creating overloaded functions, but I don't know. I'll try.
 */
-template<typename u_type, typename u_val>
-std::string_view err(const u_type& raw_error, u_val& target) {
-    /*
-        If you wanna use one of these, use that, is the best one
-        and is easy to understand:
-        1. We get the RAW_ERROR and the TARGET (that will receive the 
-        value).
-        2. We verify if is success, if true, TARGET receive the value
-        and return SUCCESS.
-        3. Else, we do a compiling time for loop passing for all enumerators 
-        of ERRORCODE (after we transformed it into an array to the compiler)
-        checking for one that matches with our error, turning the current meta
-        member of the array a data inside our program and comparing with 
-        the error, which both are hexadecimal, so the comparasion is possible.
-        4. If matches, we get the member and get its identifier e return as
-        string_view.
-        5. If none of that steps runs successfuly, it means that is a unknown
-        error.
-    */
-    ERRORCODE error;
-    error = raw_error.error_or(ERRORCODE::SUCCESS);
-    if (error == ERRORCODE::SUCCESS) {
-        // caso seja sucesso:
-        target = raw_error.value();
-        return std::string_view(std::meta::identifier_of(^^ERRORCODE::SUCCESS));
-    } else {    // se for erro.
-
-        template for (constexpr auto member : define_static_array(std::meta::enumerators_of(^^ERRORCODE))) {
-            if ([:member:] == error) {
-                return std::string_view(std::meta::identifier_of(member));
-            }
-        }
-
-        return std::string_view("UNKNOWN_ERROR");
-    }
-}
-
-// ATTENTION: probably those functions DON'T WORK and DOESN'T COMPILE.
-#ifdef NOT_WORKING_FUNCTIONS
-
-    template<typename u_type, typename u_val>
-    consteval bool IsError(const u_type& raw_error, u_val& target) {
-        ERRORCODE error;
-        error = raw_error.error_or(ERRORCODE::SUCCESS);
-        if (error == ERRORCODE::SUCCESS) {
-            target = raw_error.value();
-            return false;
-        } else {    
-            return true;
-        }
-    }
-
-    /*
-        https://gkteco.medium.com/using-c-concepts-for-great-good-part-1-2ae42c7a0d6d
-        template<typename T>
-        concept Showable = requires(T& t, std::ostream& os) {
-            {os << t} -> std::same_as<std::ostream&>; 
-        };
-
-        << é um operador de fluxo, é como se fosse colocar um dado dentro do outro.
-        ali testa se o std::ostream& aceitaria um tipo T como entrada, mas como ele faz?
-        ele faz direto o deslocamento de fluxo com << dentro de chaves (ou seja, modificou o valor
-        de ostream) e depois verifica se o TIPO DE ENDEREÇO (não o tipo em si) é o mesmo
-        que um std::ostream& pegando o tipo de retorno com ->. Caso NAO SEJA POSSIVEL
-        fazer "os << t" ela para ali mesmo e retorna false, o que significa que não vai nem chegar na seta.
-        é como um if:
-        if {os << t} { std::same_as<std::ostream&>; }
-        ou
-        if is_possible {os << t} get_result_to { if same_as<ostream&> return true }
-        if          true            ->          same_as<tipo>   return true
-        Mas há um porém, a parte {os << t} apenas checa se É POSSIVEL FAZER esse deslocamento,
-        se for mal formado, porém, passará na regra. Para verificar o resultado pegamos o
-        resultado com -> e fazemos uma comparação (é como se fosse um ==) com std::same_as<std::ostream&>
-        ou seja, verificando se o tipo é igual (note que é um tipo de ENDERECO). Se a regra
-        foi cumprida, isto é, retornou true, fica implicito.
-    */
-
-    // INTEGRAL
-    template<typename err_type>
-    concept tpInt = requires(const err_type& object_error) { 
-        {object_error.value()} -> std::same_as<int&>; 
-    };
-    
-    template<typename err_type>
-    concept expctType = requires(const err_type& object_error) { 
-        object_error.value();
-    };
-
-    template<expctType err_type>
-    
-    auto err(const err_type& error) -> decltype(error.value(std::string_view(""))) { 
-        decltype(error.value_or(error.error())) t_value{0}; 
-        if constexpr (IsError(error, t_value)) {
-            return StrError(error, t_value);
-        } else {
-            return t_value; 
-        }
-    };
-    
-
-    
-#endif
-
-#endif //CXX26_DEBUG

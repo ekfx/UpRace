@@ -26,7 +26,8 @@
 #include <type_traits>
 #include <cstdint>
 
-#include "Configurator.hpp"
+#include "Advanced.hpp"
+#include "Configurator.h"
 #include "Shader.h"
 #include "Timer.h"
 #include "Clock.h"

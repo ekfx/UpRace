@@ -22,7 +22,7 @@ void HUD::Start(GLFWwindow* window) {
 void HUD::Run(float window_width, float window_height, bool debug_window) {
     float aspect_ratio = window_width/window_height;
     float hud_width = (window_width/100)*25;
-    float hud_height = (window_height/100)*20;
+    float hud_height = (window_height/100)*30;
 
     if (callback_custom_render) {
         if (!ActivedHUD) return;    // termina funcao

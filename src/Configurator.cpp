@@ -1,45 +1,6 @@
-#ifdef CXX26_DEBUG
+#include "Configurator.h"
 
-#ifndef CONFIGURATOR_H
-#define CONFIGURATOR_H
-
-#include <iostream>
-#include <filesystem>
-#include <string>
-#include <fstream>
-#include <map>
-#include <expected>
-#include <optional>
-#include <memory>
-#include <variant>
-#include <meta>
-#include <type_traits>
-#include <cstdint>
-#include "Advanced.hpp"
-
-class Configurator {
-private:
-    std::map<std::string, float> n_data;
-    std::map<std::string, std::string> c_data;
-    int READ_PREFERENCE;
-    /*
-        0  -> automatic
-        1  -> only text
-        -1 -> only numbers
-    */
-
-public:
-    Configurator(int read_preference = 0) : READ_PREFERENCE(read_preference) {};
-    ~Configurator() {};
-
-    std::optional<ERRORCODE> Init(const std::filesystem::path& source_path);    
-    std::expected<std::variant<float, std::string>, ERRORCODE> GetValue(const std::string& key);
-};
-
-
-// #include "Configurator.hpp"
-
-std::optional<ERRORCODE> Configurator::Init(const std::filesystem::path& source_path) {
+ERRORCODE Configurator::Read(const std::filesystem::path& source_path) {
     if (!std::filesystem::exists(source_path)) {
         return ERRORCODE::FILE_DONT_EXIST;
     } else {
@@ -58,8 +19,8 @@ std::optional<ERRORCODE> Configurator::Init(const std::filesystem::path& source_
                 if (t_line.empty()) {
                     // there's nothing here
                 } else if ((t_line[0] == '#') || 
-                (t_line[0] == '/' && t_line[1] == '/') ||
-                (t_line[0] == ' ')) {
+                            (t_line[0] == '/' && t_line[1] == '/') ||
+                            (t_line[0] == ' ')) {
                     // this is a commentary or inappropriate format
                 } else {
                     size_t index_equal;
@@ -81,24 +42,26 @@ std::optional<ERRORCODE> Configurator::Init(const std::filesystem::path& source_
                     
                     if (READ_PREFERENCE == 0) {
                         // for generic (have restrictions)
-                        for (int i = 0; i < s_value.length(); i++) {
-                            if (s_value.find_first_of("1234567890") != s_value.npos) {
-                                // se nao encontrar retorna npos (-1 ou o maior valor possivel para uint)
-                                // queremos que NAO encontre para que seja numero.
-                                is_number = true;
-                            }
+                        std::string c = "";
+                        c = s_value.at(0);
+                        if (c.find_first_of("1234567890-+") != c.npos) {
+                            // se nao encontrar retorna npos (-1 ou o maior valor possivel para uint)
+                            // queremos que NAO encontre para que seja numero.
+                            is_number = true;
+                        } else {
+                            is_number = false;
                         }
                         
+                        
                         // std::cout << "KEY: " << t_key << " - VALUE: " << s_value << " - NUMBER: " << is_number << std::endl;
-                        // system("pause"); -> debugging
+                        // system("pause"); 
                         
                         if (is_number) {
                             n_data.insert({t_key, std::stof(s_value) });
                         } else {
                             c_data.insert({t_key, s_value });
                         }
-                        
-                        
+
                     } else if (READ_PREFERENCE == 1) {
                         // for text
                         c_data.insert({t_key, s_value });
@@ -112,7 +75,6 @@ std::optional<ERRORCODE> Configurator::Init(const std::filesystem::path& source_
                     equal_trigger       = false;
                     t_key               = "";
                     t_line              = "";
-                    is_number           = false;
                 }
             }
         } else {
@@ -123,36 +85,44 @@ std::optional<ERRORCODE> Configurator::Init(const std::filesystem::path& source_
     }
 }
 
-std::expected<std::variant<float, std::string>, ERRORCODE> Configurator::GetValue(const std::string& key) {
-    ERRORCODE t_err;
+std::expected<float, ERRORCODE> Configurator::GetValueN(const std::string& key) {
+    auto iterador = n_data.find(key);
+    std::map<std::string, float>::iterator null_it{};
     
-    {
-        auto iterador = n_data.find(key);
-        std::map<std::string, float>::iterator null_it_n{};
-        
-        if (iterador != null_it_n) {
-            return iterador->second;    
-        } else {
-            t_err = ERRORCODE::NOT_FOUND_KEY;
-        }
+    if (iterador != null_it) {
+        return iterador->second;    
+    } else {
+        return std::unexpected(ERRORCODE::NOT_FOUND_KEY);
     }
+}
     
-    {
-        auto iterador = c_data.find(key);
-        std::map<std::string, std::string>::iterator null_it_n{};
-        
-        if (iterador != null_it_n) {
-            return iterador->second;    
-        } else {
-            t_err = ERRORCODE::NOT_FOUND_KEY;
-        }
+std::expected<std::string, ERRORCODE> Configurator::GetValueC(const std::string& key) {
+    auto iterador = c_data.find(key);
+    std::map<std::string, std::string>::iterator null_it{};
+    
+    if (iterador != null_it) {
+        return iterador->second;    
+    } else {
+        return std::unexpected(ERRORCODE::NOT_FOUND_KEY);
     }
-    return std::unexpected(t_err);
-    //return ERRORCODE::SUCCESS;
 }
 
+std::map<std::string, float>& Configurator::GetMapN() {
+    return n_data;
+}
+std::map<std::string, std::string>& Configurator::GetMapC() {
+    return c_data;
+}
 
-#endif // CONFIGURATOR_H
-//g++ -std=c++26 -freflection main.cpp -o main.exe
+void Configurator::CleanN() {
+    n_data.clear();
+}
 
-#endif
+void Configurator::CleanC() {
+    c_data.clear();
+}
+
+void Configurator::Clean() {
+    n_data.clear();
+    c_data.clear();
+}

@@ -4,15 +4,6 @@
 bool SoundCore::Init() {
     statusSoundCore = ma_engine_init(NULL, &engineSoundCore);
     if (statusSoundCore != MA_SUCCESS) {
-        #ifdef APPLICATION_DEBUG_MODE   
-            // é uma boa pratica     
-            std::cerr << "MINIAUDIO::ENGINE_INITIALIZATION::FAILED\n";
-            /*
-                std::cerr é feito para codigos de erro, diferente do cout,
-                ele nao passa pelo buffer do sistema, o que significa que ele
-                é lançado no console imediatamente.
-            */
-        #endif
         return false;
     }
     return true;

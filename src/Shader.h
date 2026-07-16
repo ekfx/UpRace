@@ -68,7 +68,7 @@ public:
     u32 GetShaderProgramID();
     std::string GetShaderProgram();
 
-    void CreateBasicShaders(std::string path_vertex = "../shaders/shaders.vert", std::string path_fragment = "../shaders/shaders.frag");
+    void CreateBasicShaders(const std::string& path_vertex = "../shaders/shaders.vert", const std::string& path_fragment = "../shaders/shaders.frag");
 
     /////////////////////////////////////////////////////////////////////////////////
     // Status

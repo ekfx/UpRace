@@ -12,7 +12,7 @@ ifeq ($(OS), Windows_NT)
     CXX = g++ -std=c++26 -freflection
     CXXFLAGS = -Iinclude -MMD -MP -O0 -g0 -pipe
     LDFLAGS = -Llib-mingw-w64 -lglfw3dll -lopengl32 -lgdi32 -lwinmm -mconsole
-    OUT = build/program.exe
+    OUT = build/UpRace.exe
     MKDIR = mkdir -p build
     RM = rm -r build
     CP_ASSETS = cp lib-mingw-w64/glfw3.dll build/

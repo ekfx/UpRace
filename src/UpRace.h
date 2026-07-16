@@ -41,29 +41,26 @@ private:
     Kart Kart0;
     Entity KartData1;
     Kart Kart1;
-    IniReader EnvConfig;
-    // std::ofstream AI;
     
     std::filesystem::path background;
     std::filesystem::path circuit;
     std::filesystem::path bitmask;
     std::filesystem::path skin;
 
-    IniReader Settings;
-    StrIniReader SettingsStr;
+    Configurator Settings;
 
-    std::vector<std::string> Environment {
+    std::vector<std::filesystem::path> Environment {
+      "../settings/setup0.ini",
       "../settings/setup1.ini",
       "../settings/setup2.ini",
-      "../settings/setup3.ini",
-      "../settings/setup4.ini"
+      "../settings/setup3.ini"
     };
 
-    std::vector<std::string> Actors = {
+    std::vector<std::filesystem::path> Actors = {
+      "../settings/kart0.ini",
       "../settings/kart1.ini",
       "../settings/kart2.ini",
-      "../settings/kart3.ini",
-      "../settings/kart4.ini"
+      "../settings/kart3.ini"
     };
 
 
