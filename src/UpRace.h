@@ -26,34 +26,52 @@ private:
         }
     };
 
-    Texture BlackMap;
-    Entity Floor;
-    Entity Circuit;
-    Shader GlobalShader;
-    Mesh GlobalMesh;  
+    std::filesystem::path background;
+    std::filesystem::path circuit;
+    std::filesystem::path bitmask;
+    
+    f32 spaceMaxW;  // relative size of the space 
+    f32 spaceMaxH;  // to the circuit (1.0f)
+    
+    Configurator Settings;
+    Texture      BlackMap;
+    Entity       Floor;
+    Entity       Circuit;
+    Shader       GlobalShader;
+    Mesh         GlobalMesh;  
     // the vertices are the same, only real difference is the 
     // model matrix, there's no need to create one vao and vbo
     // for each object in the screen.
 
-    f32 spaceMaxW;
-    f32 spaceMaxH;
+    f32 actorSize;
+    i32 lap;
+    i32 indexWinner{};
+    f32 range_checkpoint;
+    glm::vec2 checkpoint;
+    std::vector<Entity> KartData;
+    std::vector<Kart> KartActor;
+
+
     Entity KartData0;
     Kart Kart0;
     Entity KartData1;
     Kart Kart1;
     
-    std::filesystem::path background;
-    std::filesystem::path circuit;
-    std::filesystem::path bitmask;
-    std::filesystem::path skin;
-
-    Configurator Settings;
 
     std::vector<std::filesystem::path> Environment {
       "../settings/setup0.ini",
       "../settings/setup1.ini",
       "../settings/setup2.ini",
-      "../settings/setup3.ini"
+      "../settings/setup3.ini",
+      "../settings/setup4.ini",
+      "../settings/setup5.ini",
+      "../settings/setup6.ini",
+      "../settings/setup7.ini",
+      "../settings/setup8.ini",
+      "../settings/setup9.ini",
+      "../settings/setup10.ini",
+      "../settings/setup11.ini",
+      "../settings/setup12.ini",
     };
 
     std::vector<std::filesystem::path> Actors = {
@@ -81,6 +99,7 @@ private:
 
 public:
 
+    //bool StartMenu();
     void InitEnvironment();                         // Inicia o ambiente com COnfiguracoes personalziadas
     void Initialize();                              // inicializa RECURSOS
     void Input(GLFWwindow* window, f32 Delta);    // Entrada do jogador

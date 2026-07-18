@@ -1,6 +1,7 @@
 #include "Kart.h"
 
 Kart::Kart() {
+    lap             = 0;
     Vel             = 0;
     RPMMax          = 8000.0f;
     RPMInc          = 500.55f;
@@ -23,6 +24,7 @@ Kart::~Kart()
 // Logic
 
 void Kart::Run(int direction, float delta) {
+    // issue: fix delta time to adjust to frametime
     if (direction == ENGINE::DIRECTION::FORWARD) {
         if (RPM < RPMMax) RPM += RPMInc*delta;
         
@@ -30,7 +32,7 @@ void Kart::Run(int direction, float delta) {
         // VelInc -= Vel*delta;
 
     } else if (direction == ENGINE::DIRECTION::BACKWARD) {
-        if (RPM < +RPMMax) RPM += RPMInc*delta;
+        if (RPM < RPMMax) RPM += RPMInc*delta;
 
         Vel -= ((RPMMax-RPM)/10000.0f)*delta;
         // VelInc -= Vel*delta;
@@ -60,6 +62,16 @@ void Kart::Turn(int direction, float delta) {
     }
 }
 
+bool Kart::CheckAABB(std::pair<float, float> x_interval, std::pair<float, float> y_interval) {
+    if ((X > x_interval.first && X < x_interval.second) 
+        &&
+        (Y > y_interval.first && Y < y_interval.second)) {
+        return true;    // collision
+    } else {
+        return false;
+    }
+}
+
 void Kart::UpdateData(float delta) {
     // Vel = 0;
     // VelAng = 0;
@@ -67,7 +79,7 @@ void Kart::UpdateData(float delta) {
     //Vel = VelInc;
     //VelAng = VelIncAng;
     
-    Vel = Vel*VelInertia;
+    Vel = Vel*(1 - (1 - VelInertia)*delta);
 
     // We have the Y (Vel) and the angle, so we need the X to create
     // the direction vector multiplying the Y with the tangent of the angle.
@@ -136,7 +148,7 @@ bool Kart::SetConfig(const std::map<std::string, float>& config, const std::stri
         // 10000 - 9937.9 = 62.1
         // 62.1 * 10 = 621
         Weight                   = config.at(std::string("Weight"          ));
-        VelInertia = (10000 - (Weight / 10)) / 10000;
+        VelInertia = (10000 - (Weight * 10)) / 10000;
 
         VelAng                   = config.at(std::string("VelAng"          ));
         VelAngMax                = config.at(std::string("VelAngMax"       ));

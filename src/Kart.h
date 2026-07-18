@@ -39,6 +39,8 @@ private:
     std::string  Skin;
 
 public:
+    int lap;
+
     Kart();
     ~Kart();
 
@@ -47,6 +49,7 @@ public:
     void Turn(int direction, float delta);
 
     void UpdateData(float delta);
+    bool CheckAABB(std::pair<float, float> x_interval, std::pair<float, float> y_interval);
     std::pair<int, int> ConvertToImageScale(float x_old, float y_old, float width_space, float height_space, float width_scale, float height_scale);
 
     // Utilitary

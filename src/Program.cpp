@@ -15,15 +15,17 @@ Program::~Program()
 void Program::Loop() {
     ekClock.StartCounter();
     InitializeEssential();
-    InitEnvironment();
-    Initialize();
-    while (!glfwWindowShouldClose(ekWindowProvider.GetWindow())) {
-        ProcessEssential();
-        Processing();
-        Render();
-        Essential();
-    }
-    Release();
+    //if (StartMenu()) {
+        InitEnvironment();
+        Initialize();
+        while (!glfwWindowShouldClose(ekWindowProvider.GetWindow())) {
+            ProcessEssential();
+            Processing();
+            Render();
+            Essential();
+        }
+        Release();
+    //}
     std::cout << (f32)glfwGetTime() << " seconds elapsed since the program start." << std::endl;
 }
 
@@ -56,6 +58,10 @@ void Program::InitializeEssential()
     Mouse::EndFrame();
     Mouse::BlockMouseInScreen(GetWindowHandle(), false);
 }
+
+// bool Program::StartMenu() 
+// {
+// }
 
 void Program::InitEnvironment() 
 {

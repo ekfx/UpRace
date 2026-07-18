@@ -14,6 +14,7 @@ private:
     bool ActivedHUD = 1;
     std::string infoLog;
     std::function<void()> callback_custom_render;
+    std::function<void()> callback_custom_style;
     /*
         isso é uma funcao lambda, void() diz o tipo, 
         std::function é o tipo que ela tem e é definido
@@ -49,6 +50,7 @@ public:
     ~HUD();
 
     void SetCustomRenderFunction(std::function<void()> custom_render_function_lambda);
+    void SetCustomStyleFunction(std::function<void()> custom_style_function_lambda);
     void Start(GLFWwindow* window);
     void Run(float window_width, float window_height, bool debug_window);
     void Release();

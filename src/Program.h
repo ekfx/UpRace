@@ -70,6 +70,7 @@ public:
     void InitializeEssential();
     void Essential();
     void ProcessEssential();
+    //virtual bool StartMenu();                       // star menu
     virtual void InitEnvironment();                         // Inicia o ambiente com COnfiguracoes personalziadas
     virtual void Initialize();                              // inicializa RECURSOS
     virtual void Input(GLFWwindow* window, f32 Delta);    // Entrada do jogador
