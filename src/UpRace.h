@@ -8,6 +8,8 @@
 #ifndef UPRACE_H
 #define UPRACE_H
 
+constexpr float LAP_INCREASE_DELAY = 2900.0f;
+
 #include "Program.h"
 #include "Kart.h"
 
@@ -34,6 +36,7 @@ private:
     f32 spaceMaxH;  // to the circuit (1.0f)
     
     Configurator Settings;
+    i32          env_num;
     Texture      BlackMap;
     Entity       Floor;
     Entity       Circuit;
@@ -44,13 +47,13 @@ private:
     // for each object in the screen.
 
     f32 actorSize;
+    bool delayLap;
     i32 lap;
-    i32 indexWinner{};
+    i32 indexWinner;
     f32 range_checkpoint;
     glm::vec2 checkpoint;
     std::vector<Entity> KartData;
     std::vector<Kart> KartActor;
-
 
     Entity KartData0;
     Kart Kart0;
@@ -65,13 +68,7 @@ private:
       "../settings/setup3.ini",
       "../settings/setup4.ini",
       "../settings/setup5.ini",
-      "../settings/setup6.ini",
-      "../settings/setup7.ini",
-      "../settings/setup8.ini",
-      "../settings/setup9.ini",
-      "../settings/setup10.ini",
-      "../settings/setup11.ini",
-      "../settings/setup12.ini",
+      "../settings/setup6.ini"
     };
 
     std::vector<std::filesystem::path> Actors = {
@@ -99,7 +96,7 @@ private:
 
 public:
 
-    //bool StartMenu();
+    bool StartMenu();
     void InitEnvironment();                         // Inicia o ambiente com COnfiguracoes personalziadas
     void Initialize();                              // inicializa RECURSOS
     void Input(GLFWwindow* window, f32 Delta);    // Entrada do jogador

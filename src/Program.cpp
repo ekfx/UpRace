@@ -15,7 +15,7 @@ Program::~Program()
 void Program::Loop() {
     ekClock.StartCounter();
     InitializeEssential();
-    //if (StartMenu()) {
+    if (StartMenu()) {
         InitEnvironment();
         Initialize();
         while (!glfwWindowShouldClose(ekWindowProvider.GetWindow())) {
@@ -25,7 +25,7 @@ void Program::Loop() {
             Essential();
         }
         Release();
-    //}
+    }
     std::cout << (f32)glfwGetTime() << " seconds elapsed since the program start." << std::endl;
 }
 
@@ -58,39 +58,6 @@ void Program::InitializeEssential()
     Mouse::EndFrame();
     Mouse::BlockMouseInScreen(GetWindowHandle(), false);
 }
-
-// bool Program::StartMenu() 
-// {
-// }
-
-void Program::InitEnvironment() 
-{
-}
-
-void Program::Initialize() 
-{    
-}
-
-void Program::Processing() 
-{
-}
-
-void Program::ProcessPhysics(f32 Delta) 
-{
-}
-
-void Program::Input(GLFWwindow* window, f32 Delta) 
-{    
-}
-
-void Program::Render() 
-{
-}
-
-void Program::Release() 
-{
-}
-
 
 // Configs
 void Program::UpdateWindowName(bool if_run, f32 miliseconds) {

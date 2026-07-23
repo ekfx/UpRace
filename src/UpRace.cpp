@@ -1,8 +1,88 @@
 #include "UpRace.h"
 
-// bool StartMenu() {
-// 	return true;	// true means to start
-// }
+bool UpRace::StartMenu() {
+    // Menu Data
+    HUD menu;
+    int ShouldStart = -1;
+    i32 env_buf = -1;
+    
+    // Style
+    std::string topName = "UpRace Main Menu";
+
+    menu.Start(GetWindowHandle());
+	
+    menu.SetCustomStyleFunction([&](){
+		ImGuiStyle& Style = ImGui::GetStyle();
+        float aspect_ratio 	= GetWindowHeight() / GetWindowWidth();
+        float WindowSize = 500.0f;
+        float Width = (GetWindowWidth() / 2) - (WindowSize / 2);
+        float Height = (GetWindowHeight() / 2) - (WindowSize / 2);
+
+		ImGui::SetNextWindowPos(ImVec2(Width, Height));
+		ImGui::SetNextWindowSize(ImVec2(WindowSize, WindowSize));
+		Style.FontScaleMain = 2.05f;
+	});
+
+    menu.SetCustomRenderFunction([&](){
+        ImGui::Begin("noname", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration);
+            // is basically the same thing that I used to centralize the window: ((MajorWndSize - MinorWndSize) / 2)
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize(topName.c_str()).x)) / 2);
+            ImGui::TextColored(ImVec4(1.0f, 1.0f, 1.0f, 1.0f), topName.c_str());
+            ImGui::Text("");
+
+            ////////////////////////////////////////////////////////////////
+            // Map
+
+            std::string slt = "Setup: number from 0 to ";
+            slt += std::to_string(Environment.size() - 1);
+            
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize(slt.c_str()).x)) / 2);
+            ImGui::Text(slt.c_str());
+            
+            ImGui::InputInt("##label", &env_buf, 0, 0);
+
+            ////////////////////////////////////////////////////////////////
+            // Input system
+            
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Start").x)) / 2);
+            if (ImGui::Button("Start")) {
+                if (env_buf >= 0 && env_buf < Environment.size()) {
+                    env_num = env_buf;
+                    ShouldStart = 1;       
+                } else {
+                    ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Select a number.").x)) / 2);
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Select a number.");    
+                }
+            } 
+            
+            ImGui::Text("");
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Quit").x)) / 2);
+            if (ImGui::Button("Quit")) {
+                ShouldStart = 0;
+            } 
+        ImGui::End();
+    });
+
+    while (1) {
+        menu.Run(GetWindowWidth(), GetWindowHeight(), 0);
+        
+        glfwSwapBuffers(GetWindowHandle());
+        glfwPollEvents(); 
+
+        if (glfwWindowShouldClose(GetWindowHandle())) {
+            ShouldStart = 0;
+            break;
+        }
+
+        if (ShouldStart != -1) {
+            break;
+        }
+    }
+
+    menu.Release();
+
+ 	return ShouldStart;	// true means to start
+}
 
 void UpRace::InitEnvironment() 
 {
@@ -17,7 +97,7 @@ void UpRace::InitEnvironment()
     
     std::cout << err(Settings.Read(std::filesystem::path("../settings/settings.ini").make_preferred())) << std::endl;
     
-    std::cout << err(Settings.Read(Environment.at(Settings.GetValueN("env_num").value()).make_preferred())) << std::endl;
+    std::cout << err(Settings.Read(Environment.at(env_num).make_preferred())) << std::endl;
 	std::cout << err(Settings.GetValueN("actorSize"), actorSize) << std::endl;
 	std::cout << err(Settings.GetValueN("range_checkpoint"), range_checkpoint) << std::endl;
     std::cout << err(Settings.GetValueN("spaceMaxH"), spaceMaxH) << std::endl;
@@ -101,6 +181,7 @@ void UpRace::Initialize()
     ekHUD.SetCustomRenderFunction([&](){
         ImGui::Begin("UpRace", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoDecoration);
         ImGui::Text("Circuit ---------------");
+        ImGui::Text("Time: %dm %ds", (i32)glfwGetTime()/60, ((i32)glfwGetTime())%60);
         ImGui::Text("Laps: %d", lap);
 		ImGui::Text("Winner: %d", indexWinner);
         ImGui::Text("");
@@ -249,17 +330,21 @@ void UpRace::Input(GLFWwindow* window, f32 Delta)
 
 void UpRace::ProcessPhysics(f32 Delta) 
 {
-	int i = 0;
+	int i = 1;
 	for (auto& member : KartActor) {
 		member.UpdateData(Delta);
-		if (ekTimer.UpdateTick(ekClock, 5000)) {
-			if (member.CheckAABB({checkpoint.x - range_checkpoint, checkpoint.x + range_checkpoint},
-								 {checkpoint.y - range_checkpoint, checkpoint.y + range_checkpoint})) {
-				member.lap++;
-			}
-		}
+        // issue: couldnt create lap system successfully
+		if (ekTimer.UpdateTick(ekClock, LAP_INCREASE_DELAY)) {
+            delayLap = true;
+        }
 
-		if (KartActor.at(i).lap == lap) {
+        if (delayLap && member.CheckAABB({checkpoint.x - range_checkpoint, checkpoint.x + range_checkpoint},
+                                         {checkpoint.y - range_checkpoint, checkpoint.y + range_checkpoint})) {
+            member.lap++;
+            delayLap = false;
+        }
+
+		if (member.lap == lap) {
 			indexWinner = i;
 		}
 		

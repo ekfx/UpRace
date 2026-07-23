@@ -70,14 +70,14 @@ public:
     void InitializeEssential();
     void Essential();
     void ProcessEssential();
-    //virtual bool StartMenu();                       // star menu
-    virtual void InitEnvironment();                         // Inicia o ambiente com COnfiguracoes personalziadas
-    virtual void Initialize();                              // inicializa RECURSOS
-    virtual void Input(GLFWwindow* window, f32 Delta);    // Entrada do jogador
-    virtual void ProcessPhysics(f32 Delta);               // processa fisica
-    virtual void Processing();                              // processamento
-    virtual void Render();                                  // render
-    virtual void Release();                                 // Deletes
+    virtual bool StartMenu()                            = 0; // star menu
+    virtual void InitEnvironment()                      = 0; // Inicia o ambiente com COnfiguracoes personalziadas
+    virtual void Initialize()                           = 0; // inicializa RECURSOS
+    virtual void Input(GLFWwindow* window, f32 Delta)   = 0; // Entrada do jogador
+    virtual void ProcessPhysics(f32 Delta)              = 0; // processa fisica
+    virtual void Processing()                           = 0; // processamento
+    virtual void Render()                               = 0; // render
+    virtual void Release()                              = 0; // Deletes
 
     
     // Configs
