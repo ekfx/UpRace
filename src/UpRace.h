@@ -37,6 +37,7 @@ private:
     
     Configurator Settings;
     i32          env_num;
+    i32          ply_num;
     Texture      BlackMap;
     Entity       Floor;
     Entity       Circuit;
@@ -67,8 +68,7 @@ private:
       "../settings/setup2.ini",
       "../settings/setup3.ini",
       "../settings/setup4.ini",
-      "../settings/setup5.ini",
-      "../settings/setup6.ini"
+      "../settings/setup5.ini"
     };
 
     std::vector<std::filesystem::path> Actors = {

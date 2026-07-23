@@ -3,8 +3,9 @@
 bool UpRace::StartMenu() {
     // Menu Data
     HUD menu;
-    int ShouldStart = -1;
-    i32 env_buf = -1;
+    i32 ShouldStart = -1;
+    i32 env_buf = 0;
+    i32 ply_buf = 1;
     
     // Style
     std::string topName = "UpRace Main Menu";
@@ -14,12 +15,13 @@ bool UpRace::StartMenu() {
     menu.SetCustomStyleFunction([&](){
 		ImGuiStyle& Style = ImGui::GetStyle();
         float aspect_ratio 	= GetWindowHeight() / GetWindowWidth();
-        float WindowSize = 500.0f;
-        float Width = (GetWindowWidth() / 2) - (WindowSize / 2);
-        float Height = (GetWindowHeight() / 2) - (WindowSize / 2);
+        float WindowSizeW = 700.0f;
+        float WindowSizeH = 500.0f;
+        float Width = (GetWindowWidth() / 2) - (WindowSizeW / 2);
+        float Height = (GetWindowHeight() / 2) - (WindowSizeH / 2);
 
 		ImGui::SetNextWindowPos(ImVec2(Width, Height));
-		ImGui::SetNextWindowSize(ImVec2(WindowSize, WindowSize));
+		ImGui::SetNextWindowSize(ImVec2(WindowSizeW, WindowSizeH));
 		Style.FontScaleMain = 2.05f;
 	});
 
@@ -33,25 +35,46 @@ bool UpRace::StartMenu() {
             ////////////////////////////////////////////////////////////////
             // Map
 
-            std::string slt = "Setup: number from 0 to ";
-            slt += std::to_string(Environment.size() - 1);
+            std::string slt = "Circuit (0 - ";
+            slt += std::to_string(Environment.size()-1);
+            slt += ")";
             
             ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize(slt.c_str()).x)) / 2);
             ImGui::Text(slt.c_str());
-            
-            ImGui::InputInt("##label", &env_buf, 0, 0);
+
+            ImGui::PushItemWidth(150.0f);
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (150.0f)) / 2);
+            ImGui::InputInt("##1x", &env_buf, 1, -1);
+            ImGui::Text("");
 
             ////////////////////////////////////////////////////////////////
-            // Input system
+            // Player
+
+            slt = "Players (1 - ";
+            slt += std::to_string(Actors.size());
+            slt += ")";
+            
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize(slt.c_str()).x)) / 2);
+            ImGui::Text(slt.c_str());
+
+            ImGui::PushItemWidth(150.0f);
+            ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (150.0f)) / 2);
+            ImGui::InputInt("##2x", &ply_buf, 1, -1);
+            ImGui::Text("");
+
+            ////////////////////////////////////////////////////////////////
             
             ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Start").x)) / 2);
             if (ImGui::Button("Start")) {
                 if (env_buf >= 0 && env_buf < Environment.size()) {
-                    env_num = env_buf;
-                    ShouldStart = 1;       
+                    if (ply_buf >= 1 && ply_buf <= 4) {
+                        env_num = env_buf;
+                        ply_num = ply_buf;
+                        ShouldStart = 1;       
+                    }
                 } else {
-                    ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Select a number.").x)) / 2);
-                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Select a number.");    
+                    ImGui::SetCursorPosX(((ImGui::GetWindowSize().x) - (ImGui::CalcTextSize("Select a number from the interval.").x)) / 2);
+                    ImGui::TextColored(ImVec4(1.0f, 0.0f, 0.0f, 1.0f), "Select a number from the interval.");    
                 }
             } 
             
@@ -94,6 +117,8 @@ void UpRace::InitEnvironment()
         criacao do jogo.
     */
 
+    auto to_del = Actors.size() - ply_num;
+    Actors.erase((Actors.end() - to_del), Actors.end());
     
     std::cout << err(Settings.Read(std::filesystem::path("../settings/settings.ini").make_preferred())) << std::endl;
     
@@ -220,111 +245,120 @@ void UpRace::Input(GLFWwindow* window, f32 Delta)
 		std::cout << "y =" + std::to_string(KartActor.at(0).GetY()) + "\n";
 	}
 
-    if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
-                              KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
-      if (Keyboard::isKeyPressed(GLFW_KEY_W)) {
-            KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
-      } else if (Keyboard::isKeyPressed(GLFW_KEY_S)) {
-    		KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
-      }
-    } else {
-		KartActor.at(i).Freeze();	
+    if (ply_num >= 1) {
+        if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
+                                KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
+        if (Keyboard::isKeyPressed(GLFW_KEY_W)) {
+                KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_S)) {
+                KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+        } else {
+            KartActor.at(i).Freeze();	
+        }
+
+        if (Keyboard::isKeyPressed(GLFW_KEY_A)) {
+            KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_D)) {
+            KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+
+        if (Keyboard::isKeyPressed(GLFW_KEY_SPACE)) {
+            KartActor.at(i).ResetPos();
+        }
+    
+        KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
+        KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
     }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_A)) {
+    /////////////////////////////////////////////////////////////
+    if (ply_num >= 2) {
+        i++;
+        
+        if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
+                                KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
+        if (Keyboard::isKeyPressed(GLFW_KEY_UP)) {
+                KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_DOWN)) {
+            KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+        } else {
+        KartActor.at(i).Freeze();
+        }
+
+        if (Keyboard::isKeyPressed(GLFW_KEY_LEFT)) {
         KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
-    } else if (Keyboard::isKeyPressed(GLFW_KEY_D)) {
-        KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
-    }
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_RIGHT)) {
+            KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_SPACE)) {
-    	KartActor.at(i).ResetPos();
+        if (Keyboard::isKeyPressed(GLFW_KEY_END)) {
+        KartActor.at(i).ResetPos();
+        }
+        
+        KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
+        KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
     }
-   
-    KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
-    KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
-
-    /////////////////////////////////////////////////////////////
-	i++;
-    
-    if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
-                              KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
-      if (Keyboard::isKeyPressed(GLFW_KEY_UP)) {
-              KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
-      } else if (Keyboard::isKeyPressed(GLFW_KEY_DOWN)) {
-          KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
-      }
-    } else {
-      KartActor.at(i).Freeze();
-    }
-
-    if (Keyboard::isKeyPressed(GLFW_KEY_LEFT)) {
-       KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
-    } else if (Keyboard::isKeyPressed(GLFW_KEY_RIGHT)) {
-        KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
-    }
-
-    if (Keyboard::isKeyPressed(GLFW_KEY_END)) {
-      KartActor.at(i).ResetPos();
-    }
-    
-    KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
-    KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
 
     /////////////////////////////////////////////////////////////
-	i++;
-    
-    if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
-                              KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
-      if (Keyboard::isKeyPressed(GLFW_KEY_KP_8)) {
-              KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
-      } else if (Keyboard::isKeyPressed(GLFW_KEY_KP_5)) {
-          KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
-      }
-    } else {
-      KartActor.at(i).Freeze();
-    }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_KP_4)) {
-       KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
-    } else if (Keyboard::isKeyPressed(GLFW_KEY_KP_6)) {
-        KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
-    }
+    if (ply_num >= 3) {
+        i++;
+        
+        if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
+                                KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
+        if (Keyboard::isKeyPressed(GLFW_KEY_KP_8)) {
+                KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_KP_5)) {
+            KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+        } else {
+        KartActor.at(i).Freeze();
+        }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_KP_0)) {
-      KartActor.at(i).ResetPos();
+        if (Keyboard::isKeyPressed(GLFW_KEY_KP_4)) {
+        KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_KP_6)) {
+            KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+
+        if (Keyboard::isKeyPressed(GLFW_KEY_KP_0)) {
+        KartActor.at(i).ResetPos();
+        }
+        
+        KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
+        KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
     }
-    
-    KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
-    KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
 
 	/////////////////////////////////////////////////////////////
-	i++;
-    
-    if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
-                              KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
-      if (Keyboard::isKeyPressed(GLFW_KEY_I)) {
-              KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
-      } else if (Keyboard::isKeyPressed(GLFW_KEY_K)) {
-          KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
-      }
-    } else {
-      KartActor.at(i).Freeze();
-    }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_J)) {
-       KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
-    } else if (Keyboard::isKeyPressed(GLFW_KEY_L)) {
-        KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
-    }
+    if (ply_num >= 4) {
+        i++;
+        
+        if (BlackMap.isPixelBlack(KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::X_AXIS, spaceMaxW, BlackMap.GetWidth()), 
+                                KartActor.at(i).GetRelativeCoord(ENGINE::AXIS::Y_AXIS, spaceMaxH, BlackMap.GetHeight()))) {
+        if (Keyboard::isKeyPressed(GLFW_KEY_I)) {
+                KartActor.at(i).Run(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_K)) {
+            KartActor.at(i).Run(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
+        } else {
+        KartActor.at(i).Freeze();
+        }
 
-    if (Keyboard::isKeyPressed(GLFW_KEY_0)) {
-      KartActor.at(i).ResetPos();
-    }
-    
-    KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
-    KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
+        if (Keyboard::isKeyPressed(GLFW_KEY_J)) {
+        KartActor.at(i).Turn(ENGINE::DIRECTION::FORWARD, Delta);
+        } else if (Keyboard::isKeyPressed(GLFW_KEY_L)) {
+            KartActor.at(i).Turn(ENGINE::DIRECTION::BACKWARD, Delta);
+        }
 
+        if (Keyboard::isKeyPressed(GLFW_KEY_0)) {
+        KartActor.at(i).ResetPos();
+        }
+        
+        KartActor.at(i).Run(ENGINE::DIRECTION::NOTHING, Delta);
+        KartActor.at(i).Turn(ENGINE::DIRECTION::NOTHING, Delta);
+    }
     
 }
 
