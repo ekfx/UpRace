@@ -1,4 +1,4 @@
-![Game Screenshot](assets/uprace_video_final.mp4)
+![Game Screenshot](assets/uprace-23072026.gif)
 # UpRace!
 Top-Down game project. I ended this project today (07/23/2026) 30 days later the start. I think this is a good game.
 I couldn't create the AI that I thought but the basics is there, the sound was a challenge for me, actually I didn't add it.
