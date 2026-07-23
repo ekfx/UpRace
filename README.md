@@ -15,16 +15,16 @@ increase my portfolio.
 ## How to play
 We have five circuits and four players, you will select the circuit in the main menu and then
 select how many players you will want to use. To play with then you will use:
-W / Up / Num. 8 / I -> throttle;
-S / Down / Num. 5 / K -> break;
-A / Left / Num. 4 / J -> turn left;
-D / Right / Num. 6 / L -> turn right,
+- W / Up / Num. 8 / I -> throttle;
+- S / Down / Num. 5 / K -> break;
+- A / Left / Num. 4 / J -> turn left;
+- D / Right / Num. 6 / L -> turn right,
 
 Being:
-Player 1 - WASD
-Player 2 - Arrows
-Player 3 - Numeric Keyboard
-Player 4 - IJKL
+- Player 1 - WASD
+- Player 2 - Arrows
+- Player 3 - Numeric Keyboard
+- Player 4 - IJKL
 
 The Lap System is not perfect, but I think this works.
 
